@@ -52,6 +52,10 @@ nb_fic_y_top = 3 #number of fictitious quadrats in the nord of France
 discreti = 1 #number of discretisation points by qudrats in each direction
 delta_t = 0.1  #time discretisation
 diffusion_period = 60   #period of spore diffusion : 60 days (July and August)
+diffusion_solver = 'exact' #'exact': dense Crank-Nicolson as in PEOC 1.0
+                           #         (outputs identical to the original)
+                           #'fast': the same scheme stepped with a sparse LU,
+                           #         ~10x faster, within ~1e-12 relative
 
 #estimation of the parameters on the period initialization_year to
 #final_year_of_the_estimation_period

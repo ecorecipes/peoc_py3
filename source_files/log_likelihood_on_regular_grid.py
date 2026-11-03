@@ -83,9 +83,9 @@ def compute_log_likelihoods(folder):
 
     pool1 = Pool(processes = num_workers)
     while k_D < N_D:
-        cste = v_D[k_D]*para.delta_t/(2*(para.h**2))
-        M_inv = np.linalg.inv(np.eye(RD.n)+cste*RD.M_lap)
-        A = 2*M_inv-np.eye(RD.n)
+        # identical computation to PEOC 1.0 in 'exact' mode; (None, None)
+        # with the 'fast' solver, whose workers build their own sparse LU
+        M_inv, A = RD.diffusion_operators(v_D[k_D])
 
         while k<N_by_D:
             v_range = np.arange(num_workers)+k+k_D*N_by_D
