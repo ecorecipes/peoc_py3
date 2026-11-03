@@ -24,10 +24,10 @@ def get_para_and_likelihood(folder, algo):
         prior = 1.0
         for i in range(para.shape[1]):
             if (algoPara.parameters_ranges[i,1]
-                    <>algoPara.parameters_ranges[i,0]):
+                    !=algoPara.parameters_ranges[i,0]):
                 prior *= 1/(algoPara.parameters_ranges[i,1]
                             -algoPara.parameters_ranges[i,0])
-        vrai[vrai<>0]-=np.log(prior)
+        vrai[vrai!=0]-=np.log(prior)
         return[para,vrai]
 
 
@@ -57,8 +57,8 @@ def return_bernoulli_parameter(r_symp, C_non_recover, gamma,kappa, fongi, T,N):
 def computeRMSE(dossier, algo, T, N_annees):
     if algo == 'MH':
         [sampled_para,vraisemblance] =  get_para_and_likelihood(dossier, algo)
-        i_max_vrai = np.argmax(vraisemblance[vraisemblance<>0])
-        bestpara = sampled_para[vraisemblance<>0][i_max_vrai]
+        i_max_vrai = np.argmax(vraisemblance[vraisemblance!=0])
+        bestpara = sampled_para[vraisemblance!=0][i_max_vrai]
 
     if algo == "AMIS":
         vrais_priori = np.load(dossier + '/log_likelihood_times_prior.npy')
@@ -67,9 +67,9 @@ def computeRMSE(dossier, algo, T, N_annees):
         sampled_para = np.load(dossier + '/sampled_parameters.npy')
         sampled_para = sampled_para.reshape((sampled_para.shape[0]
                                 *sampled_para.shape[1],sampled_para.shape[2]))
-        sampled_para = sampled_para[vrais_priori<>0]
-        vrais_priori = vrais_priori[vrais_priori<>0]
-        i_max_vrai = np.unravel_index(np.argmax(vrais_priori[vrais_priori<>0]),
+        sampled_para = sampled_para[vrais_priori!=0]
+        vrais_priori = vrais_priori[vrais_priori!=0]
+        i_max_vrai = np.unravel_index(np.argmax(vrais_priori[vrais_priori!=0]),
                                           vrais_priori.shape)
         bestpara = sampled_para[i_max_vrai]
     infection_1 = np.load(dossier + '/infection_1.npy')
@@ -77,17 +77,17 @@ def computeRMSE(dossier, algo, T, N_annees):
     
     (r_symp, r_allee, beta_0, beta_1, D, S_sat, gamma, C_recover, C_init,
          kappa) = bestpara
-    print "Parameters set with the best likelihood:"
-    print "r_symp = ", bestpara[0]
-    print "r_allee = ", bestpara[1]
-    print "beta_0 = ", bestpara[2]
-    print "beta_1 = ", bestpara[3]
-    print "D = ", bestpara[4]
-    print "S_sat = ", bestpara[5]
-    print "gamma = ", bestpara[6]
-    print "C_recover = ", bestpara[7]
-    print "C_init = ", bestpara[8]
-    print "kappa = ", bestpara[9]
+    print("Parameters set with the best likelihood:")
+    print("r_symp = ", bestpara[0])
+    print("r_allee = ", bestpara[1])
+    print("beta_0 = ", bestpara[2])
+    print("beta_1 = ", bestpara[3])
+    print("D = ", bestpara[4])
+    print("S_sat = ", bestpara[5])
+    print("gamma = ", bestpara[6])
+    print("C_recover = ", bestpara[7])
+    print("C_init = ", bestpara[8])
+    print("kappa = ", bestpara[9])
     
     f_temp1 = simuPara.f_temperature(T[index_temp],gamma,kappa)
     f_temp2 = simuPara.f_temperature(T[1+index_temp],gamma,kappa)
@@ -105,13 +105,13 @@ def computeRMSE(dossier, algo, T, N_annees):
     bernoulli_para = return_bernoulli_parameter(r_symp, C_recover, gamma, kappa,
                                                 fungi_per_ash, T, N_annees)
     
-    print "Log-likelihood from 2008 to", 2007+N_annees, ":",
-    print likelihood.compute_log_likelihood(r_symp, C_recover, gamma,kappa,
-                                            fungi_per_ash, T, N_annees)[0]
+    print("Log-likelihood from 2008 to", 2007+N_annees, ":", end=' ')
+    print(likelihood.compute_log_likelihood(r_symp, C_recover, gamma,kappa,
+                                            fungi_per_ash, T, N_annees)[0])
 
-    print "Computation of RMSE values: the printed data are"
-    print "year a: number of data - RMSE of the year a - ",
-    print "RMSE from 2008 to the year a"
+    print("Computation of RMSE values: the printed data are")
+    print("year a: number of data - RMSE of the year a - ", end=' ')
+    print("RMSE from 2008 to the year a")
     bernoull = np.zeros((N_annees, simuPara.nb_quadrats_x,
                              simuPara.nb_quadrats_y))
     q = np.zeros((simuPara.nb_quadrats_x,simuPara.nb_quadrats_y))    
@@ -133,13 +133,13 @@ def computeRMSE(dossier, algo, T, N_annees):
             RMSE_a += (y[i,3]*0.01-bernoull[a][int(y[i,1]), int(y[i,2])])**2
         RMSE += RMSE_a
         nb_obs +=  np.size(y[:,0])
-        print "year ", str(2008+a), ":", np.size(y[:,0]),
-        print np.sqrt(RMSE_a / np.sum(np.size(y[:,0]))),
-        print np.sqrt(RMSE / nb_obs)
+        print("year ", str(2008+a), ":", np.size(y[:,0]), end=' ')
+        print(np.sqrt(RMSE_a / np.sum(np.size(y[:,0]))), end=' ')
+        print(np.sqrt(RMSE / nb_obs))
         data_RMSE[a] = [np.size(y[:,0]),
                         np.sqrt(RMSE_a / np.sum(np.size(y[:,0]))),
                         np.sqrt(RMSE / nb_obs)]
-    print "number of observations:", nb_obs
+    print("number of observations:", nb_obs)
 
 def RMSE(dossier, algo):
     computeRMSE(dossier, algo, env_data.T, 2022-2007+1)

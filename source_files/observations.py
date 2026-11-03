@@ -10,9 +10,9 @@ with the following structure for each year: for data of 2008
     data2008[3,i] : number of observations of the i-th quadrat in 2008
 """
 
-dataDSF = np.loadtxt('data_chalara.txt', dtype=np.str)
+dataDSF = np.loadtxt('data_chalara.txt', dtype=str)
 dataDSF = dataDSF[1:]
-y = dataDSF[:,[3,6,7,10]].astype(np.float)
+y = dataDSF[:,[3,6,7,10]].astype(float)
 '''y[i,0] = year of the i-th observation
    y[i,1] = quadrat abscissa index
    y[i,2] = quadrat ordinate index
@@ -20,8 +20,8 @@ y = dataDSF[:,[3,6,7,10]].astype(np.float)
 y[:,1] += para.nb_fic_x_left #add the fictive quadrats
 y[:,2] += para.nb_fic_y_bottom #add the fictive quadrat
 
-xl2 = np.loadtxt('data_chalara.txt', dtype=np.str)[:,6]
-yl2 = np.loadtxt('data_chalara.txt', dtype=np.str)[:,7]
+xl2 = np.loadtxt('data_chalara.txt', dtype=str)[:,6]
+yl2 = np.loadtxt('data_chalara.txt', dtype=str)[:,7]
 
 observation = []
 

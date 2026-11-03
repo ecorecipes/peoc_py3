@@ -1,10 +1,11 @@
 # -*- coding:Utf-8 -*-
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import sys
 import os
 import matplotlib.pyplot as plt
 import matplotlib.lines
+from py2_compat import py2_str
             
 #plt.style.use('classic')
 ext = '.png'
@@ -34,6 +35,16 @@ font_size_z = 16
 ticksize = 12
 
     
+def pcolormesh_flat(x, y, z, **kwargs):
+    """pcolormesh as in matplotlib < 3.3 (used by the original PEOC): with
+    shading='flat' and C of the same shape as X and Y, the last row and column
+    of C are silently dropped. Recent matplotlib raises an error (or uses
+    'nearest' shading) instead, so drop them explicitly."""
+    if np.shape(z) == np.shape(x):
+        z = z[:-1, :-1]
+    return pl.pcolormesh(x, y, z, shading='flat', **kwargs)
+
+
 def label_type(type_of_data, year, type_label):
     if type_of_data == 'nb_frenes':
         label_bar = 'density of infected ashes in ' + str(year)
@@ -94,7 +105,7 @@ def plot_heat_map_with_data(x, y, z, path, vmin=None, vmax=None, cbarlabel="",
                             title="", plotobservationdata = False,
                             observationdata = None, alpha = 0.7, savefig=True):
     pl.clf()
-    pl.pcolormesh(x, y, z, alpha=alpha, vmin=vmin, vmax=vmax)
+    pcolormesh_flat(x, y, z, alpha=alpha, vmin=vmin, vmax=vmax)
     pl.xlim([0,np.max(x)])
     pl.ylim([0,np.max(y)])
     cbar = pl.colorbar()
@@ -156,7 +167,7 @@ def law_2D(path, x, y, index_x, index_y, weights_x=None):
     cbar = pl.colorbar()
     cbar.set_label('density', fontsize = font_size_z)
     cbar.ax.tick_params(labelsize=ticksize)
-    pl.title('Correlation coefficient: ' + str(round(r, 2)),
+    pl.title('Correlation coefficient: ' + py2_str(round(float(r), 2)),
                  fontsize=font_size_x)
     pl.xlabel(legen[index_x], fontsize=font_size_x)
     pl.ylabel(legen[index_y], fontsize=font_size_y)

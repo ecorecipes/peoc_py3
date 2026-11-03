@@ -10,7 +10,7 @@ import shutil
 plot_graphs_at_the_end_of_sampling_algo = False
 np.random.seed(1) #set the random seed (can be changed for independant runs).
 
-print """This script allows to run algorithms to estimate parameters of a model
+print("""This script allows to run algorithms to estimate parameters of a model
 for the expension of the chalara or to make graphs associated to run of these
 algorithms. 
 
@@ -53,13 +53,13 @@ The possible actions are:
 
 For more informations about the inputs and outputs of actions, please read the
 file 'READ_ME.txt'.
-"""
+""")
 
 arret = False
 action2 = ""
 
 while arret==False:
-    action = raw_input("Select an action (1, 2, 3, 4, 5, 6, 7, 8, 9 or q): ")
+    action = input("Select an action (1, 2, 3, 4, 5, 6, 7, 8, 9 or q): ")
     if action in ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'Q']:
         arret = True
 
@@ -86,17 +86,17 @@ if action in ["3","4","5"]:
         liste = os.listdir('Simulations')
 
     if liste == []:
-        print "No simulation have been done."
+        print("No simulation have been done.")
     else:
         liste.sort()
-        print "List of the simulations:"
+        print("List of the simulations:")
         for i in range(len(liste)):
-            print i+1, ' ', liste[i]
-        print "q quit"
-        numsimu = raw_input("Enter the number of the simulation:")
+            print(i+1, ' ', liste[i])
+        print("q quit")
+        numsimu = input("Enter the number of the simulation:")
         if numsimu not in ["q","Q"]:
             simu = liste[int(numsimu)-1]
-            print 'Selected simulation : ', simu
+            print('Selected simulation : ', simu)
         else: action="q"
 
 algo = ""   
@@ -138,7 +138,7 @@ if action in ["1", "2", "3", "8"] and save_script:
                     dossier+'/source_files')
 
 if action in ["1", "2", "3", "8"]:
-    print 'Path of the simulation: ', dossier
+    print('Path of the simulation: ', dossier)
     import simulationParameters as para
     if para.plot_curves:
         import plotting_functions
@@ -148,7 +148,7 @@ def action_end_of_algo(action):
     if plot_graphs_at_the_end_of_sampling_algo:
         return "graph"
     else:
-        print "To plot graphs, run 'main_script.py' and select action 4."
+        print("To plot graphs, run 'main_script.py' and select action 4.")
         return action
 
 if action in ["1", "2"]:

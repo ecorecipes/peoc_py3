@@ -1,6 +1,6 @@
 # -*- coding:Utf-8 -*-
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import shutil
 import os
 import time
@@ -39,8 +39,8 @@ def plot_laws(dossier, para, weight, plot_index, index_fig=""):
     if os.path.exists(dossier)==False:                           
         os.mkdir(dossier)
 
-    print "The posterior distributions are plotted in the folder:"
-    print dossier
+    print("The posterior distributions are plotted in the folder:")
+    print(dossier)
         
     for i in plot_index:
         path = dossier + '/law_1D_' + labels[i] + index_fig + ext
@@ -59,7 +59,7 @@ def get_amis_data(folder,getpara=False, getvraiprior=False, getvrai=False,
                     getweights=False,  getmeanProp=False, getvarProp=False,
                     reshape=True):
     
-    ND_index = range(simuPara.number_of_parameters)
+    ND_index = list(range(simuPara.number_of_parameters))
     for i in range(simuPara.number_of_parameters):
         if simuPara.parameters_ranges[i,0]==simuPara.parameters_ranges[i,1]:
             ND_index.remove(i)
@@ -88,10 +88,10 @@ def get_amis_data(folder,getpara=False, getvraiprior=False, getvrai=False,
         if getvrai:
             for i in range(simuPara.number_of_parameters):
                 if (simuPara.parameters_ranges[i,1]
-                        <>simuPara.parameters_ranges[i,0]):
+                        !=simuPara.parameters_ranges[i,0]):
                     prior *= 1/(simuPara.parameters_ranges[i,1]
                                 -simuPara.parameters_ranges[i,0])
-            vrai[vrai<>0]-=np.log(prior)
+            vrai[vrai!=0]-=np.log(prior)
             z.append(vrai)
     if getweights:
         weight = np.load(folder + '/weight.npy')
@@ -127,7 +127,7 @@ def posterior_distributions(dossier, algo, convergence_to_posterior=False):
         [sampled_para,weight] = get_amis_data(dossier, getpara=True,
                                                   getweights=True)
 
-    ND_para = range(simuPara.number_of_parameters)
+    ND_para = list(range(simuPara.number_of_parameters))
     for i in range(simuPara.number_of_parameters):
         if simuPara.parameters_ranges[i,0]==simuPara.parameters_ranges[i,1]:
             ND_para.remove(i)
@@ -180,18 +180,18 @@ def weighted_sample(dossier,indices, k):
 def histogrammes(path, p,w, classes, indice, index_fig):
     nb_para = np.size(p[0])
     hist1D = [np.zeros(1)]*nb_para
-    hist2D = [np.zeros(1)]*(nb_para*(nb_para-1)/2)
+    hist2D = [np.zeros(1)]*(nb_para*(nb_para-1)//2)
     l = 0
     for i in range(nb_para):
         pl.clf()
-        hist1D[i] = pl.hist(p[:,i], classes[i], normed=True, weights=w,
+        hist1D[i] = pl.hist(p[:,i], classes[i], density=True, weights=w,
                             stacked=True, color='b', histtype='stepfilled')[0]
         pl.xlabel(legen[indice[i]], fontsize=16)
         pl.savefig(path + '/law_' + labels[indice[i]] + index_fig +'bis.pdf')
         for j in range(nb_para):
             if j>i:
                 pl.clf() 
-                hist2D[l] = np.histogram2d(p[:,i],p[:,j], normed=True,
+                hist2D[l] = np.histogram2d(p[:,i],p[:,j], density=True,
                                             bins=(classes[i], classes[j]),
                                             weights = w)[0]
                 l+=1
@@ -199,14 +199,14 @@ def histogrammes(path, p,w, classes, indice, index_fig):
 
 
 def algo_convergence(dossier, algo):
-    ND_para = range(simuPara.number_of_parameters)
+    ND_para = list(range(simuPara.number_of_parameters))
     for i in range(simuPara.number_of_parameters):
         if simuPara.parameters_ranges[i,0]==simuPara.parameters_ranges[i,1]:
             ND_para.remove(i)
     nb_para = np.size(ND_para)
                 
     if algo=='MH':
-        print "The function algo_convergence is not coded for the MH algorithm."
+        print("The function algo_convergence is not coded for the MH algorithm.")
     
     if algo=='AMIS':
         if os.path.exists(dossier+'/graph_law')==False:           
@@ -215,7 +215,7 @@ def algo_convergence(dossier, algo):
             os.mkdir(dossier+'/graph_law/evol_law')
         nb_range = 200
         N_AMIS = number_of_amis_iterations(dossier)
-        print "Iterations number of the AMIS algorithm: ", N_AMIS
+        print("Iterations number of the AMIS algorithm: ", N_AMIS)
         
         sampled_para  = get_amis_data(dossier, getpara=True, reshape=False)[0]
         partition = np.zeros((nb_para, nb_range))
@@ -292,7 +292,7 @@ def plot_para_proposal_evolution(dossier):
     if os.path.exists(dossier+'/graph_law/evol_proposal')==False:              
         os.mkdir(dossier+'/graph_law/evol_proposal')
         
-    ND_para = range(simuPara.number_of_parameters)
+    ND_para = list(range(simuPara.number_of_parameters))
     for i in range(simuPara.number_of_parameters):
         if simuPara.parameters_ranges[i,0]==simuPara.parameters_ranges[i,1]:
             ND_para.remove(i)
@@ -332,7 +332,7 @@ def plot_proposal_evolution(dossier):
     if os.path.exists(dossier+'/graph_law/evol_proposal')==False:              
         os.mkdir(dossier+'/graph_law/evol_proposal')
         
-    ND_para = range(simuPara.number_of_parameters)
+    ND_para = list(range(simuPara.number_of_parameters))
     for i in range(simuPara.number_of_parameters):
         if simuPara.parameters_ranges[i,0]==simuPara.parameters_ranges[i,1]:
             ND_para.remove(i)
@@ -363,7 +363,7 @@ def plot_proposal_evolution(dossier):
                     z = scipy.stats.multivariate_normal.pdf(p, mean_prop[[i,j]],
                                                 var_prop[[i,j]][:,[i,j]])
                     pl.clf()
-                    pl.pcolormesh(range_x, range_y, z)
+                    plot_graphs.pcolormesh_flat(range_x, range_y, z)
                     cbar = pl.colorbar()
                     cbar.set_label('density', fontsize = 25)
                     cbar.ax.tick_params(labelsize=15)
@@ -389,29 +389,29 @@ def dynamics_best_parameter(dossier, algo, plot_2020=False):
 
     if algo == 'MH':
         [sampled_para,vraisemblance] =  get_para_and_likelihood(dossier, algo)
-        i_max_vrai = np.argmax(vraisemblance[vraisemblance<>0])
-        bestpara = sampled_para[vraisemblance<>0][i_max_vrai]
-        print 'Log-likelihood of the best parameter :',
-        print vraisemblance[i_max_vrai]
+        i_max_vrai = np.argmax(vraisemblance[vraisemblance!=0])
+        bestpara = sampled_para[vraisemblance!=0][i_max_vrai]
+        print('Log-likelihood of the best parameter :', end=' ')
+        print(vraisemblance[i_max_vrai])
 
     if algo == "AMIS":
         [sampled_para, vrais_priori, weight] = get_amis_data(dossier,
                                     getpara=True, getvrai=True, getweights=True)
-        sampled_para = sampled_para[vrais_priori<>0]
-        vrais_priori = vrais_priori[vrais_priori<>0]
+        sampled_para = sampled_para[vrais_priori!=0]
+        vrais_priori = vrais_priori[vrais_priori!=0]
         
-        i_max_vrai = np.unravel_index(np.argmax(vrais_priori[vrais_priori<>0]),
+        i_max_vrai = np.unravel_index(np.argmax(vrais_priori[vrais_priori!=0]),
                                           vrais_priori.shape)
         bestpara = sampled_para[i_max_vrai]
-        print 'log-likelihood of the best parameter :',
-        print vrais_priori[i_max_vrai]
+        print('log-likelihood of the best parameter :', end=' ')
+        print(vrais_priori[i_max_vrai])
     infection_1 = np.load(dossier + '/infection_1.npy')
     infection_2 = np.load(dossier + '/infection_2.npy')
 
-    print "The dynamics for the best parameter are plotted in the folder:"
-    print dossier + '/evolution_best_para'
-    print "for the set of parameters:"
-    for i in range(10): print labels[i] + "=", bestpara[i]
+    print("The dynamics for the best parameter are plotted in the folder:")
+    print(dossier + '/evolution_best_para')
+    print("for the set of parameters:")
+    for i in range(10): print(labels[i] + "=", bestpara[i])
         
     plot_evolution_chalarose(dossier + '/evolution_best_para',
                               bestpara[:10], infection_1,
@@ -420,8 +420,8 @@ def dynamics_best_parameter(dossier, algo, plot_2020=False):
 def parameters_evolution(dossier, algo):
     if os.path.exists(dossier + '/algo_iterations')==False:                     
         os.mkdir(dossier + '/algo_iterations')
-    print "The evolutions of the sampled parameters are plotted in the folder:"
-    print dossier + '/algo_iterations'
+    print("The evolutions of the sampled parameters are plotted in the folder:")
+    print(dossier + '/algo_iterations')
     
     [estimated_para,vraisemblance] =  get_para_and_likelihood(dossier, algo)
     for i in [0,1,2,3,4,5,6,7,8,9]:
@@ -439,8 +439,8 @@ def log_vraisemblance(dossier, algo):
         os.mkdir(dossier + '/algo_iterations')
     for i in [0,1,2,3,4,5,6,7,8,9]:
         pl.clf()
-        pl.plot(estimated_para[:,i][vraisemblance<>0],
-                    vraisemblance[vraisemblance<>0], 'x')
+        pl.plot(estimated_para[:,i][vraisemblance!=0],
+                    vraisemblance[vraisemblance!=0], 'x')
         pl.xlabel(legen[i], fontsize=16)
         pl.ylabel('log-likelihood', fontsize=14)
         pl.tick_params(axis='y', labelsize=8)

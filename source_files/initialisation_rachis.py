@@ -17,9 +17,9 @@ infection_1 = np.zeros((n_x, n_y))   #infected rachis for the year -2
 infection_2 = np.zeros((n_x, n_y))   #infected rachis for the year -1
 
 init_chalara = np.loadtxt('rachis_initialization.txt',
-                                dtype=np.str)[1:,[1,2,8,9]]
+                                dtype=str)[1:,[1,2,8,9]]
     
-init_chalara = init_chalara[init_chalara[:,3]<>'0'].astype(np.float)
+init_chalara = init_chalara[init_chalara[:,3]!='0'].astype(float)
 init_chalara[:,0] /= 1000
 init_chalara[:,1] *= 1000
 

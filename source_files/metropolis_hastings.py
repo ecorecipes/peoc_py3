@@ -5,19 +5,20 @@ import simulationParameters_of_the_AMIS_or_MH_algorithm as paraMH
 import initialisation_rachis as init_rachis
 import plotting_functions
 import os
+from py2_compat import py2_str, py2_round, save_random_state, load_random_state
 
 def print_parameters(text, parameters_set):
-    print text
-    print "   r_symp = ", parameters_set[0]
-    print "   r_allee = ", parameters_set[1]
-    print "   beta_0 = ", parameters_set[2]
-    print "   beta_1 = ", parameters_set[3]
-    print "   D = ", parameters_set[4]
-    print "   S_sat = ", parameters_set[5]
-    print "   gamma = ", parameters_set[6]
-    print "   C_non_recover = ", parameters_set[7]
-    print "   C_init = ", parameters_set[8]
-    print "   kappa = ", parameters_set[9]
+    print(text)
+    print("   r_symp = ", parameters_set[0])
+    print("   r_allee = ", parameters_set[1])
+    print("   beta_0 = ", parameters_set[2])
+    print("   beta_1 = ", parameters_set[3])
+    print("   D = ", parameters_set[4])
+    print("   S_sat = ", parameters_set[5])
+    print("   gamma = ", parameters_set[6])
+    print("   C_non_recover = ", parameters_set[7])
+    print("   C_init = ", parameters_set[8])
+    print("   kappa = ", parameters_set[9])
 
             
 def metropolis_hastings(dossier, oldSimu=None):
@@ -31,28 +32,25 @@ def metropolis_hastings(dossier, oldSimu=None):
     if paraMH.para_bloc==False:
         nb_varied_para = 0
         for i in range(Np):
-            if paraMH.parameters_ranges[i,0]<>paraMH.parameters_ranges[i,1]:
+            if paraMH.parameters_ranges[i,0]!=paraMH.parameters_ranges[i,1]:
                 nb_varied_para +=1
-        index_varied_para = range(nb_varied_para)
+        index_varied_para = list(range(nb_varied_para))
         nb_varied_para = 0
         for i in range(Np):
-            if paraMH.parameters_ranges[i,0]<>paraMH.parameters_ranges[i,1]:
+            if paraMH.parameters_ranges[i,0]!=paraMH.parameters_ranges[i,1]:
                 index_varied_para[nb_varied_para] = i
                 nb_varied_para +=1
                 
     #initialization
     if oldSimu:
-        seed = np.load(dossier+'/seed.npy')
-        seed2 = np.array(np.load(dossier+'/seed2.npy'), dtype=np.uint32)
-        np.random.set_state((seed[0],seed2,np.int(seed[1]), np.int(seed[2]),
-                                np.float(seed[3])))
+        load_random_state(dossier, key_dtype=np.uint32)
         k = np.size(np.load(dossier + '/log_likelihood.npy'))-1
         para_mh[:k+1] = np.load(dossier + '/sampled_parameters.npy')
         log_vraisemblance[:k+1] = np.load(dossier + '/log_likelihood.npy')
         acceptation_rate[:k+1] = np.load(dossier + '/acceptation_rate.npy')
         infection_1 = np.load(dossier + '/infection_1.npy')
         infection_2 = np.load(dossier + '/infection_2.npy')
-        accept = round(acceptation_rate[k]*k) #acceptation/rejection counter
+        accept = py2_round(acceptation_rate[k]*k) #acceptation/rejection counter
         if paraMH.para_bloc==False:
             i_para = k % nb_varied_para
         print_parameters("Last parameters: ", para_mh[k,:Np])
@@ -83,13 +81,13 @@ def metropolis_hastings(dossier, oldSimu=None):
     log_vraisemblance[0] = log_vrai_oldpara*(1-terme0_old)
     
     if terme0_old==1:
-        print "WARNING : the likelihood of the initial parameter is zero."
+        print("WARNING : the likelihood of the initial parameter is zero.")
 
     while k<N_mh:
         #modification des paramètres:
         new_para = para_mh[k,:Np]*1
 
-        print ""
+        print("")
         if paraMH.para_bloc:
             new_para = paraMH.generer_proposition_dist(para_mh[k,:Np])
         else:
@@ -105,7 +103,7 @@ def metropolis_hastings(dossier, oldSimu=None):
         pro_dis1 =  paraMH.proposition_dist(para_mh[k,:Np], new_para)
         pro_dis2 =  paraMH.proposition_dist(new_para,para_mh[k,:Np])
         
-        if prior_newpara<>0:
+        if prior_newpara!=0:
             [log_vrai_newpara,
             terme0_new] = likelihood.log_likelihood(new_para, infection_1,
                                                      infection_2)
@@ -117,19 +115,19 @@ def metropolis_hastings(dossier, oldSimu=None):
                                  /(prior_oldpara*pro_dis2))*       
                  (np.exp(log_vrai_newpara-log_vrai_oldpara)))
 
-        print 'Log-likelihood of the new parameter :',
-        print log_vrai_newpara*(1-terme0_new)
-        print 'Prior of the new parameter :',prior_newpara
-        print 'Proposal distribution from the old to the new parameter :',
-        print pro_dis1
-        print 'Log-likelihood of the old parameter :',
-        print log_vrai_oldpara*(1-terme0_old)
-        print 'Prior of the old parameter :',
-        print prior_oldpara
-        print 'Proposal distribution from the new to the old parameter :',
-        print pro_dis2
+        print('Log-likelihood of the new parameter :', end=' ')
+        print(log_vrai_newpara*(1-terme0_new))
+        print('Prior of the new parameter :',prior_newpara)
+        print('Proposal distribution from the old to the new parameter :', end=' ')
+        print(pro_dis1)
+        print('Log-likelihood of the old parameter :', end=' ')
+        print(log_vrai_oldpara*(1-terme0_old))
+        print('Prior of the old parameter :', end=' ')
+        print(prior_oldpara)
+        print('Proposal distribution from the new to the old parameter :', end=' ')
+        print(pro_dis2)
         
-        if terme0_old<>1:
+        if terme0_old!=1:
             if np.random.random()<delta:
                 para_mh[k+1,:Np] = new_para
                 log_vraisemblance[k+1] = log_vrai_newpara*(1-terme0_new)
@@ -149,19 +147,16 @@ def metropolis_hastings(dossier, oldSimu=None):
             terme0_old = terme0_new*1
 
         acceptation_rate[k+1] = accept*1.0/(k+1)
-        print "Acceptation rate of the algorithm:", accept*1.0/(k+1)
-        print (k+1)*100.0/N_mh, "% of the algorithm is done."
+        print("Acceptation rate of the algorithm:", py2_str(accept*1.0/(k+1)))
+        print(py2_str((k+1)*100.0/N_mh), "% of the algorithm is done.")
         
         np.save(dossier + '/sampled_parameters.npy', para_mh[:k+2])
         np.save(dossier + '/log_likelihood.npy', log_vraisemblance[:k+2])
         np.save(dossier + '/acceptation_rate.npy', acceptation_rate[:k+2])
-        randomstate = np.random.get_state()
-        np.save(dossier + '/seed.npy', [randomstate[0],randomstate[2],
-                                            randomstate[3],randomstate[4]])
-        np.save(dossier + '/seed2.npy', randomstate[1])
+        save_random_state(dossier)
         k +=1
 
-    print ""
-    print "Acceptation rate of the algorithm:", accept*1.0/N_mh
-    print "Results have been saved in " + dossier
+    print("")
+    print("Acceptation rate of the algorithm:", py2_str(accept*1.0/N_mh))
+    print("Results have been saved in " + dossier)
 

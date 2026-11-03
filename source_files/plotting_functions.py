@@ -1,6 +1,6 @@
 # -*- coding:Utf-8 -*-
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import simulationParameters as para
 import observations
 import environmental_data as env_data
@@ -24,8 +24,8 @@ def initialisation(dossier):
     y = np.arange(np.size(ash_density[0,:]))
     [Y,X] = np.meshgrid(y,x)
 
-    x = X[ash_density<>0]
-    y = Y[ash_density<>0]
+    x = X[ash_density!=0]
+    y = Y[ash_density!=0]
 
     rS = 1000
     rachis = [init_rachis.rachis_a_moins_2*ash_density,
@@ -41,9 +41,9 @@ def initialisation(dossier):
             pl.clf()
             #pl.plot(x,y)
             #pl.plot(x2,y2)
-            pl.plot(X[ash_density<>0],Y[ash_density<>0],'o',color='g',alpha=0.3)
-            pl.plot(x[rachis[l][ash_density<>0]<>0],
-                    y[rachis[l][ash_density<>0]<>0], 'o', color='g')
+            pl.plot(X[ash_density!=0],Y[ash_density!=0],'o',color='g',alpha=0.3)
+            pl.plot(x[rachis[l][ash_density!=0]!=0],
+                    y[rachis[l][ash_density!=0]!=0], 'o', color='g')
             annee = obs[k+1]
             chal_0_25 = (annee[2,:]>0)*(annee[2,:]<0.25)
             chal_25_50 = (annee[2,:]>=0.25)*(annee[2,:]<0.50)
@@ -59,7 +59,7 @@ def initialisation(dossier):
             pl.savefig(dossier+'/initialization'+str(2008+k)+ ext)
 
         pl.clf()
-        pl.pcolormesh(X, Y, rachis[l], alpha=0.7, vmin=-0.1*maxi, vmax = maxi)
+        pg.pcolormesh_flat(X, Y, rachis[l], alpha=0.7, vmin=-0.1*maxi, vmax = maxi)
         cbar = pl.colorbar()#boundaries=np.linspace(0,1,101))
         cbar.set_label('infected rachis', fontsize = 20)
         cbar.ax.tick_params(labelsize=15)

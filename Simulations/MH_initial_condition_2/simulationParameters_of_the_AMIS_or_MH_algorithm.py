@@ -111,7 +111,7 @@ def densite_gamma(new_p, old_p, scale0):
 def proposition_dist_gamma(new_para, old_para):
     z = 1.0
     for i in range(number_of_parameters):
-        if parameters_ranges[i,0]<>parameters_ranges[i,1]:
+        if parameters_ranges[i,0]!=parameters_ranges[i,1]:
             z*= densite_gamma(new_para[i],old_para[i],scale_para_MH[i])
     return z
 

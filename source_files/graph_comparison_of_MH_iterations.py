@@ -11,7 +11,7 @@ in the folder 'Simulations/Compare_MH_(i+1)' if the folder
 'Simulations/Compare_MH_i' already exists).
 """
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import shutil
 import os
 import time
@@ -30,7 +30,7 @@ shutil.copy("6_simulations_MH_to_compare.py", dossier +
 sys.path.append(os.getcwd()+'/'+dossier)
 from simulations_MH_to_compare import *
 
-print "Graphs are added in the folder ", dossier
+print("Graphs are added in the folder ", dossier)
 
 Hmax = 322.2 #maximal rainfall value
 

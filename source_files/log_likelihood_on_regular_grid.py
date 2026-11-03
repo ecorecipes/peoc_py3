@@ -8,7 +8,9 @@ The parameters of the regular grid have to be entered in the file
 import time
 import sys
 import numpy as np
-from multiprocessing import Pool
+import multiprocessing
+# force fork (the Python 2 behaviour); see the comment in amis.py
+Pool = multiprocessing.get_context('fork').Pool
 import simulationParameters as para
 import likelihood
 import initialisation_rachis as init_rachis
@@ -50,8 +52,8 @@ def compute_log_likelihoods(folder):
             *np.size(v_gamma)*np.size(v_S_sat)*np.size(v_C_init)
                 *np.size(v_kappa)*np.size(v_r_symp)*np.size(v_C_recover))
     N = N_D*N_by_D
-    print "Number of parameters: ", N_D, "*", N_by_D, "=", N
-    print "Log-likelihoods computed on ", num_workers, " cores"
+    print("Number of parameters: ", N_D, "*", N_by_D, "=", N)
+    print("Log-likelihoods computed on ", num_workers, " cores")
     
     parametre = np.zeros((N, 10))
     log_vraisemblance = np.zeros(N)
@@ -107,5 +109,5 @@ def compute_log_likelihoods(folder):
             k += num_workers
         k_D += 1
         k = 0
-    print ""
+    print("")
 

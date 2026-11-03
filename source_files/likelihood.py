@@ -32,14 +32,14 @@ def compute_log_likelihood(r_symp, C_non_recover, gamma,puiss, fongi, T,
             q_i = q[x_i,y_i]
             
             log_term = PCBL.clb_likeli[k_annee+l]*1.
-            if np.size(log_term[q_i==0])<>0:
-                terme0 = (PCBL.clb_likeli[k_annee+l][q_i==0,1]<>0).any()
-                log_term = PCBL.clb_likeli[k_annee+l][q_i<>0]
-                q_i = q_i[q_i<>0]
-            if np.size(log_term[q_i==1])<>0:
-                terme0 = (log_term[q_i==1,2]<>0).any()
-                log_term = log_term[q_i<>1]
-                q_i = q_i[q_i<>1]
+            if np.size(log_term[q_i==0])!=0:
+                terme0 = (PCBL.clb_likeli[k_annee+l][q_i==0,1]!=0).any()
+                log_term = PCBL.clb_likeli[k_annee+l][q_i!=0]
+                q_i = q_i[q_i!=0]
+            if np.size(log_term[q_i==1])!=0:
+                terme0 = (log_term[q_i==1,2]!=0).any()
+                log_term = log_term[q_i!=1]
+                q_i = q_i[q_i!=1]
             log_vrais += np.sum(log_term[:,0] + log_term[:,1]*np.log(q_i)
                                         + log_term[:,2]*np.log(1-q_i))
             l+=1

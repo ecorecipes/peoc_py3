@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import os
 import shutil
-import pylab as pl
+import matplotlib.pyplot as pl
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 import scipy.optimize
@@ -30,7 +30,7 @@ for j in range(len(simus)):
             os.path.getmtime('Simulations/'+ simus[j] + '/log_likeli_tab.npy')):
         msfrg.transform_data('Simulations/'+ simus[j])
 
-print "Graphs are added in the folder ", dossier
+print("Graphs are added in the folder ", dossier)
 
 def para_meshgrid(v_p_all, p_simu):
     index = np.ones(np.size(v_p_all))
@@ -49,7 +49,7 @@ def para_meshgrid(v_p_all, p_simu):
     return [index, np.append(p_simu, p_add)]
 
 def tick_string(l):
-    if l.is_integer(): return str(np.int(l))
+    if l.is_integer(): return str(int(l))
     else: return str(l)
 
     
@@ -82,9 +82,9 @@ for i in range(parameters_number):
             v_p[i][j+1] = v_p[i][j]
     v_p[i] = np.unique(np.sort(v_p[i]))
 
-print "Values of the parameters:"
+print("Values of the parameters:")
 for i in range(parameters_number):
-    print label_p[i], "=", v_p[i]
+    print(label_p[i], "=", v_p[i])
 
 
 #-------- likelihood recovery
@@ -116,13 +116,13 @@ para_to_plot = [plot_beta0, plot_D, plot_gamma, plot_kappa,
                 plot_C_recover, plot_C_init]
 def indice_in_plot_p(plot_p, vect_p):
     "return the indexes of para of vect_p in plot_p"
-    ax = range(np.size(vect_p))
+    ax = list(range(np.size(vect_p)))
     for j in range(np.size(vect_p)):
           if np.sum(np.abs(vect_p[j]-plot_p)<err)==0:
                 ax.remove(j)
     return ax
 for i in range(parameters_number):
-    if para_to_plot[i][0]<>"all":
+    if para_to_plot[i][0]!="all":
         ax = indice_in_plot_p(para_to_plot[i], v_p[i])
         v_p[i] = v_p[i][ax]
         log_vraisemblance = log_vraisemblance.take(ax, axis=i)
@@ -132,30 +132,30 @@ for i in range(parameters_number):
             parameters[i][j] = parameters[i][j][ax]
 
 #-----
-if np.size(log_vraisemblance[log_vraisemblance==1])<>0:
-    print "Number of missing parameters on the total regular grid:",
-    print np.size(log_vraisemblance[log_vraisemblance==1]),    
-    print "on ", np.size(log_vraisemblance)
+if np.size(log_vraisemblance[log_vraisemblance==1])!=0:
+    print("Number of missing parameters on the total regular grid:", end=' ')
+    print(np.size(log_vraisemblance[log_vraisemblance==1]), end=' ')    
+    print("on ", np.size(log_vraisemblance))
 
-n_para = np.sum(log_vraisemblance<>1, axis=(2,3,4,5,6,7,8,9))
+n_para = np.sum(log_vraisemblance!=1, axis=(2,3,4,5,6,7,8,9))
 
 maxi_vrai = np.max(log_vraisemblance[log_vraisemblance<0])
-if maxi<>"None":
+if maxi!="None":
     maxi_vrai = max(maxi_vrai, maxi)
 mini_vrai = np.min(log_vraisemblance)
-if mini<>None and mini<maxi_vrai:
+if mini!=None and mini<maxi_vrai:
     mini = min(max(mini,mini_vrai), maxi_vrai)
 else:
     mini = mini_vrai
     log_vraisemblance[log_vraisemblance==0] = mini_vrai*2
 log_vraisemblance[log_vraisemblance==1] = mini_vrai*3
 
-print "Maximal likelihood = ", maxi_vrai,
-print "obtained with:"
+print("Maximal likelihood = ", maxi_vrai, end=' ')
+print("obtained with:")
 ind = np.unravel_index(np.argmax(log_vraisemblance, axis=None),
        log_vraisemblance.shape)
 for i in range(parameters_number):
-    print "   ", label_p[i], "=", v_p[i][ind[i]]
+    print("   ", label_p[i], "=", v_p[i][ind[i]])
 
 #-------- tested parameters
 log_vrai_max = np.max(log_vraisemblance, axis=(2,3,4,5,6,7,8,9))
@@ -165,7 +165,7 @@ log_vrai_max[log_vrai_max==mini_vrai*3] = non_test
 nbmax_simu_by_para = np.max(n_para)
 pl.clf()
 for i in range(np.size(v_p[0])):
-    D_temp = v_p[1][n_para[i]<>0]
+    D_temp = v_p[1][n_para[i]!=0]
     pl.plot(v_p[0][i]*np.ones(np.size(D_temp)), D_temp, 'x', color='r')
 
     D_temp = v_p[1][n_para[i]==nbmax_simu_by_para]
@@ -176,8 +176,8 @@ pl.savefig(dossier+'tested_para' + ext)
 
 def plot_best_para(loglikeli, para, folder, index_fig="", title_fig=""):
     for i in range(2,parameters_number):
-        if np.size(para[i])<>1:
-            ax = range(2,parameters_number)
+        if np.size(para[i])!=1:
+            ax = list(range(2,parameters_number))
             ax.remove(i)
             ax = tuple(ax)
             p_max = para[i][np.argmax(np.max(loglikeli, axis=ax), axis=2)]
@@ -190,7 +190,7 @@ def plot_best_para(loglikeli, para, folder, index_fig="", title_fig=""):
             cbar.set_label('best ' + label_x[i], fontsize=fontsizecbar)
             cbar.ax.tick_params(labelsize = fontsizeticks)
 
-            if title_fig<>"":
+            if title_fig!="":
                 pl.title(title_fig)
                 
             pl.subplots_adjust(left=0.1, right=0.9, top=0.95, bottom=0.15)
@@ -219,8 +219,8 @@ def plot_likelihood(loglikeli, para, folder, index_fig="", title_fig="",
                         nb_graphe=1):
     for i in range(parameters_number):
         for j in range(parameters_number):
-            if j>i and np.size(para[i])<>1 and np.size(para[j])<>1:
-                ax = range(parameters_number)
+            if j>i and np.size(para[i])!=1 and np.size(para[j])!=1:
+                ax = list(range(parameters_number))
                 ax.remove(i)
                 ax.remove(j)
                 log_vrai_max = np.max(loglikeli, axis=tuple(ax))
@@ -233,17 +233,32 @@ def plot_likelihood(loglikeli, para, folder, index_fig="", title_fig="",
                     if graphe==1:
                         pl.contourf(para[i], para[j], log_vrai_max.T,20)
                         cbar = pl.colorbar()
+                        oldticks = cbar.ax.get_yticks()
                         newticks = [tick_string(l) for l in
-                                    np.interp(cbar.ax.get_yticks(),
-                                    cbar.ax.get_ylim(), cbar.get_clim())]
+                                    np.interp(oldticks,
+                                    cbar.ax.get_ylim(),
+                                    # Colorbar.get_clim() was removed in
+                                    # matplotlib 3.x; the mappable shares
+                                    # the colorbar's norm, so same values.
+                                    cbar.mappable.get_clim())]
                         newticks[0] = '<' + newticks[0]
                         pl.clim(mini, maxi_vrai)
+                        locator = cbar.ax.yaxis.get_major_locator()
+                        if len(getattr(locator, 'locs', newticks)
+                               ) != len(newticks):
+                            # matplotlib >= 3 gives contourf colorbars a
+                            # FixedLocator on all the levels (only some are
+                            # visible); matplotlib 2.2 (the reference) holds
+                            # exactly the visible ticks, so this branch is
+                            # never taken there.
+                            # Since 3.x the colorbar axis is in data units.
+                            cbar.set_ticks(oldticks)
                         cbar.ax.set_yticklabels(newticks)
                         #cbar.set_ticks(cbar.ax.get_yticks(), labels = newticks)
                         #cbar.set_ticks(newticks)
                     if graphe==2:
                         [mat_y,mat_x] = np.meshgrid(para[j], para[i])
-                        pl.pcolormesh(mat_x,mat_y, log_vrai_max,
+                        pg.pcolormesh_flat(mat_x,mat_y, log_vrai_max,
                                   vmin=non_test, vmax=maxi_vrai)
                         cbar = pl.colorbar()
                     #if title_fig<>"":
@@ -262,7 +277,7 @@ plot_best_para(log_vraisemblance, v_p, dossier)
 plot_likelihood(log_vraisemblance, v_p, dossier, nb_graphe = 2)
 
 for i in [2,3,4,5,6,7,8,9]:
-    if np.size(v_p[i])<>1:
+    if np.size(v_p[i])!=1:
         if os.path.exists(dossier + label_p[i] + 'fixe/')==False:     
             os.mkdir(dossier + label_p[i] + 'fixe/')
         para = v_p[:]
@@ -277,10 +292,10 @@ for i in [2,3,4,5,6,7,8,9]:
 
 if logscale_r_allee :
     v_p[5][v_p[5]==0] = value_0
-    v_p[5][v_p[5]<>0] = np.log(v_p[5][v_p[5]<>0])/np.log(10)
+    v_p[5][v_p[5]!=0] = np.log(v_p[5][v_p[5]!=0])/np.log(10)
     
     
-    ax = range(2,parameters_number)
+    ax = list(range(2,parameters_number))
     ax.remove(5)
     ax = tuple(ax)
     p_max = v_p[5][np.argmax(np.max(log_vraisemblance, axis=ax), axis=2)]
@@ -291,10 +306,15 @@ if logscale_r_allee :
     pl.tick_params(axis='both', labelsize=fontsizeticks)
 
     cbar = pl.colorbar()
-    newticks = [tick_string(10**l) for l in np.interp(cbar.ax.get_yticks(),
-                            cbar.ax.get_ylim(), cbar.get_clim())]
+    oldticks = cbar.ax.get_yticks()
+    newticks = [tick_string(10**l) for l in np.interp(oldticks,
+                            cbar.ax.get_ylim(), cbar.mappable.get_clim())]
     newticks[0] = 0
     newticks[1] = ""
+    # see plot_likelihood: only taken on matplotlib >= 3
+    if len(getattr(cbar.ax.yaxis.get_major_locator(), 'locs', newticks)
+           ) != len(newticks):
+        cbar.set_ticks(oldticks)
     cbar.ax.set_yticklabels(newticks)
     cbar.set_label('best ' + label_x[5], fontsize=fontsizecbar)
     cbar.ax.tick_params(labelsize = fontsizeticks)

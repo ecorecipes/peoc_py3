@@ -22,8 +22,15 @@ import likelihood
 import simulationParameters_of_the_AMIS_or_MH_algorithm as paraAMIS
 import initialisation_rachis as init_rachis
 import scipy.stats
-from multiprocessing import Pool
+import multiprocessing
 import sys
+from py2_compat import py2_str, save_random_state, load_random_state
+
+# Python 2 on Unix always forked worker processes. Python 3 defaults to 'spawn'
+# on macOS (and 'forkserver' on Linux from 3.14), which would re-execute the
+# interactive main_script.py in each worker; force 'fork' to keep the original
+# semantics (workers inherit sys.path and the loaded simulation modules).
+Pool = multiprocessing.get_context('fork').Pool
 
 num_workers = paraAMIS.num_workers
 
@@ -60,17 +67,17 @@ def log_sum_normal(mu, sigma, param):
 
 def compute_weight(para, log_vrai_prior,mean_prop, var_prop):
     log_weight = (log_vrai_prior - log_sum_normal(mean_prop, var_prop, para))
-    weight = np.exp(log_weight-np.max(log_weight[log_vrai_prior<>0]))
+    weight = np.exp(log_weight-np.max(log_weight[log_vrai_prior!=0]))
     weight[log_vrai_prior==0] = 0
     weight /= np.sum(weight)
     return weight
 
 def print_proposal(mean_proposal, var_proposal):
-    print "mean of the proposal: "
-    print mean_proposal
-    print "covariance matrix of the proposal:"
-    print var_proposal
-    print ""
+    print("mean of the proposal: ")
+    print(mean_proposal)
+    print("covariance matrix of the proposal:")
+    print(var_proposal)
+    print("")
             
 def amis(folder, oldSimu=False):
     N_amis = paraAMIS.N_AMIS
@@ -80,7 +87,7 @@ def amis(folder, oldSimu=False):
     para_amis = np.zeros((N_amis, N_L, paraAMIS.number_of_parameters))
     log_vraisemblance_prior = np.zeros((N_amis, N_L))
 
-    ND_index = range(paraAMIS.number_of_parameters)   #non-degenerated index
+    ND_index = list(range(paraAMIS.number_of_parameters))   #non-degenerated index
     for i in range(paraAMIS.number_of_parameters):
         if paraAMIS.parameters_ranges[i,0]==paraAMIS.parameters_ranges[i,1]:
             ND_index.remove(i)
@@ -99,7 +106,7 @@ def amis(folder, oldSimu=False):
         k = 0
     else:
         k = np.size(np.load(folder + '/sampled_parameters.npy')[:,0,0])
-        print "number of iterations of the previous simulation:", k
+        print("number of iterations of the previous simulation:", k)
 
         para_amis[:k] = np.load(folder + '/sampled_parameters.npy')
         weight = np.load(folder + '/weight.npy')
@@ -107,14 +114,11 @@ def amis(folder, oldSimu=False):
                                     + '/log_likelihood_times_prior.npy')
         mean_proposal[:k+1] = np.load(folder + '/mean_proposal.npy')
         var_proposal[:k+1] = np.load(folder + '/var_proposal.npy')
-        s1 = np.load(folder + '/seed.npy')
-        s2 = np.load(folder + '/seed2.npy')
-        np.random.set_state((s1[0],s2,np.int(s1[1]),np.int(s1[2]),
-                                 np.float(s1[3])))
+        load_random_state(folder)
         
     pool1 = Pool(processes = num_workers)           
     while k<N_amis:
-        print "Iteration", k+1, "/", N_amis
+        print("Iteration", k+1, "/", N_amis)
         #modification of the parameters:
         para_amis[k][:,
                  ND_index] = np.random.multivariate_normal(mean_proposal[k],
@@ -142,7 +146,7 @@ def amis(folder, oldSimu=False):
                     np.max(v_range)+1,N_L,(np.max(v_range)+1)*100.0/N_L))
                 sys.stdout.flush()
                 l += num_workers
-            print ""
+            print("")
 
         weight = compute_weight(para_amis[:k+1][:,:,ND_index],
                                  log_vraisemblance_prior[:k+1],
@@ -154,9 +158,9 @@ def amis(folder, oldSimu=False):
         var_proposal[k+1] = var
                     
         print_proposal(mean_proposal[k+1], var_proposal[k+1])
-        print "determinant of the matrix=",np.linalg.det(var_proposal[k+1])
+        print("determinant of the matrix=",np.linalg.det(var_proposal[k+1]))
         k += 1
-        print k*100.0/N_amis, "% of the algorithm is done"
+        print(py2_str(k*100.0/N_amis), "% of the algorithm is done")
         
         np.save(folder + '/sampled_parameters.npy', para_amis[:k])
         np.save(folder + '/weight.npy', weight)
@@ -165,10 +169,7 @@ def amis(folder, oldSimu=False):
         np.save(folder + '/mean_proposal.npy', mean_proposal[:k+1])
         np.save(folder + '/var_proposal.npy', var_proposal[:k+1])
         
-        randomstate = np.random.get_state()
-        np.save(folder + '/seed.npy', [randomstate[0],randomstate[2],
-                                            randomstate[3],randomstate[4]])
-        np.save(folder + '/seed2.npy', randomstate[1])
+        save_random_state(folder)
 
 
 

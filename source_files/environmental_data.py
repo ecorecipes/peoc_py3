@@ -25,8 +25,8 @@ nb_years = para.last_year_of_data-para.first_year_of_data+1
 file_name = 'climate_data'
 
 def return_environmental_data(row):
-    data = np.loadtxt(file_name, dtype=np.str)[1:,[0,1, 2, row]]
-    data = data.astype(np.float)
+    data = np.loadtxt(file_name, dtype=str)[1:,[0,1, 2, row]]
+    data = data.astype(float)
     data[:,0] *= 1000
     data[:,1] *= 1000
 
@@ -53,14 +53,14 @@ def return_temp(label):
     if label == 'T35': return return_environmental_data(14)
 def return_label_temp(label):
     temp = label[1:]
-    return r'number of days over ' +temp + '$^{\circ}$C'
+    return r'number of days over ' +temp + r'$^{\circ}$C'
         
 T = return_temp(para.temp_index)
 label_T = return_label_temp(para.temp_index)
 
 # Ashes density
-density = np.loadtxt('density.txt', dtype=np.str)
-density = density[1:,:].astype(np.float)
+density = np.loadtxt('density.txt', dtype=str)
+density = density[1:,:].astype(float)
 
 density = useful_functions.transform_data(density, 0, 1)
 

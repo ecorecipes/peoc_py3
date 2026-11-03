@@ -63,9 +63,9 @@ def solve_reaction_di(r_allee, beta_0, beta_1, D, S_sat,
     for i in np.arange(nb_years-2):
         #spores of the year i+2
         spores = (fungi_per_ash[i]+fungi_per_ash[i+1])*d_frene
-        if r_allee<>0:
+        if r_allee!=0:
             spores[spores<r_allee] *= (spores[spores<r_allee]/r_allee)
-        if beta_1<>0.:
+        if beta_1!=0.:
             spores *= (beta_0+beta_1*H[index_hum+i])
         else:
             spores *= beta_0
@@ -88,11 +88,11 @@ def solve_reaction_di(r_allee, beta_0, beta_1, D, S_sat,
         fungi_per_ash[i+2] = spores_automne*1.
         
         if np.min(fungi_per_ash[i+2])<0:
-            print "WARNING : fungi_per_ash<0", i,
-            print r_allee, beta_0, beta_1, D, S_sat
+            print("WARNING : fungi_per_ash<0", i, end=' ')
+            print(r_allee, beta_0, beta_1, D, S_sat)
     
     #if finer discretisation than at the scale of the quadrat
-    if para.discreti<>1:
+    if para.discreti!=1:
         R_temp = np.zeros((nb_years, para.nb_quadrats_x, para.n_y_RD)) 
         for a in np.arange(nb_years):
             for i in np.arange(para.discreti):
