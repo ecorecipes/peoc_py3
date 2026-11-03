@@ -41,7 +41,8 @@ for k, a in enumerate(observations.observation):
 for k, a in enumerate(pcbl.clb_likeli):
     save('clb_likeli_%02d' % k, a)
 save('infection_1', ir.infection_1); save('infection_2', ir.infection_2)
-save('M_lap', RD.M_lap)
+if RD.M_lap is not None:  # None with the port's diffusion_solver = 'fast'
+    save('M_lap', RD.M_lap)
 
 PARAS = [
     [1000.0, 15.0, 0.001, 0.0001, 30.0, 60.0, 40.0, 0.01, 0.002, 0.01],

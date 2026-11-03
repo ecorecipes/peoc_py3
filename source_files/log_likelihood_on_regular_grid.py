@@ -16,16 +16,21 @@ import likelihood
 import initialisation_rachis as init_rachis
 import environmental_data as env_data
 import reaction_diffusion as RD
+RD.set_dense_cache_size(1)  # workers see tasks grouped by D
 from parameters_for_computation_on_regular_grid import *
         
 infection_1 = init_rachis.infection_1
 infection_2 = init_rachis.infection_2
 index_temp = para.initialization_year - para.first_year_of_data
 
-def log_likelihood(p, M_inv, A):
+def log_likelihood(p):
 
     (r_symp, r_allee, beta_0, beta_1, D, S_sat, gamma, C_non_recover,
      C_init, puiss) = p
+    # PEOC 1.0 inverted once per D in the parent and pickled M_inv and A
+    # (332 MB) to the worker with every task.  Each worker now builds them
+    # itself, with the identical computation, and keeps the last D's inverse.
+    M_inv, A = RD.diffusion_operators(D)
 
     f_temp1 = para.f_temperature(env_data.T[index_temp],gamma,puiss)
     f_temp2 = para.f_temperature(env_data.T[1+index_temp],gamma,puiss)
@@ -83,16 +88,12 @@ def compute_log_likelihoods(folder):
 
     pool1 = Pool(processes = num_workers)
     while k_D < N_D:
-        # identical computation to PEOC 1.0 in 'exact' mode; (None, None)
-        # with the 'fast' solver, whose workers build their own sparse LU
-        M_inv, A = RD.diffusion_operators(v_D[k_D])
-
         while k<N_by_D:
             v_range = np.arange(num_workers)+k+k_D*N_by_D
             v_range = v_range[v_range<N_by_D+k_D*N_by_D]
             
             threads = [pool1.apply_async(log_likelihood,
-                                    args=(parametre[i],M_inv, A))
+                                    args=(parametre[i],))
                         for i in v_range]
             output = [t.get() for t in threads]
 

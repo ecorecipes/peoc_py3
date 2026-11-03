@@ -32,6 +32,11 @@ from py2_compat import py2_str, save_random_state, load_random_state
 # semantics (workers inherit sys.path and the loaded simulation modules).
 Pool = multiprocessing.get_context('fork').Pool
 
+# Every AMIS sample has its own D, so the dense-inverse cache (meant for
+# component-wise MH) could never hit; keep memory as in PEOC 1.0.
+import reaction_diffusion as RD
+RD.set_dense_cache_size(0)
+
 num_workers = paraAMIS.num_workers
 
 def compute_log_likelihood_times_prior(p):

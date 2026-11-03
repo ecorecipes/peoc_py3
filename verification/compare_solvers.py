@@ -1,10 +1,9 @@
-"""Prototype: compare exact dense Crank-Nicolson with (a) DCT closed form and
-(b) sparse-LU stepping, on the real PEOC model, for fields and likelihoods.
-usage: python fast_proto.py <peoc_py3_dir>"""
+"""Compare the exact dense Crank-Nicolson solver with (a) a DCT closed form
+and (b) the port's 'fast' sparse-LU solver (reaction_diffusion.fast_operators,
+the shipped code), on the real PEOC model, for fields and likelihoods.
+usage: python compare_solvers.py <peoc_py3_dir>"""
 import os, sys, shutil, time, tempfile
 import numpy as np
-import scipy.sparse as sp
-import scipy.sparse.linalg as spla
 
 code_dir = os.path.abspath(sys.argv[1])
 run_dir = tempfile.mkdtemp()
@@ -40,24 +39,15 @@ def gain(D):
     g[pos] = om / (2 * xs)
     return g * dt / tau
 
-def lap_sparse():
-    def l1(m):
-        d = 2 * np.ones(m); d[0] = d[-1] = 1
-        return sp.diags([d, -np.ones(m - 1), -np.ones(m - 1)], [0, 1, -1])
-    return (sp.kron(sp.eye(nx), l1(ny)) + sp.kron(l1(nx), sp.eye(ny))).tocsc()
-Ls = lap_sparse()
-
 def run(p, method):
     (r_symp, r_allee, beta_0, beta_1, D, S_sat, gamma, C_nr, C_init, kappa) = p
     orig = {}
     if method != 'exact':
-        c = D * dt / (2 * para.h ** 2)
         if method == 'dct':
             g = gain(D)
             diffuse = lambda s: Cx.T.dot(g * Cx.dot(s).dot(Cy.T)).dot(Cy)
-        else:
-            lu = spla.splu((sp.eye(nx * ny) + c * Ls).tocsc())
-            B = (sp.eye(nx * ny) - c * Ls).tocsr()
+        else:  # 'fast': the shipped operators and the shipped step
+            lu, B = RD.fast_operators(D)
             def diffuse(s):
                 src = dt * s.ravel() / tau
                 w = np.zeros(nx * ny)
@@ -106,7 +96,7 @@ for i, p in enumerate(PARAS):
     ll0, z0, f0, t0 = run(p, 'exact')
     print('para %d D=%g: exact ll=%r terme0=%g (%.1fs); zeros=%d min>0=%.3g'
           % (i, p[4], ll0, z0, t0, (f0 == 0).sum(), f0[f0 > 0].min()))
-    for m in ['dct', 'splu']:
+    for m in ['dct', 'fast']:
         ll, z, f, t = run(p, m)
         nz = f0 > 1e-300
         rel = np.abs(f[nz] - f0[nz]) / f0[nz]

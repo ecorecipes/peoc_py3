@@ -2,13 +2,20 @@
 configurations, and drives main_script.py through actions 1-9 via stdin.
 Run with any Python 3; the PEOC tree runs under the given interpreter.
 
-usage: e2e.py <python_exe> <code_dir> <work_dir> [full|amis] [--continue]
+usage: e2e.py <python_exe> <code_dir> <work_dir> [full|mh|amis|amis1d]
+              [--continue] [--solver=exact|fast]
+  full:   actions 1, 2, 8, 4, 5, 3 (incl. the shipped MH_initial_condition_1),
+          6, 7, 9 (default)
+  mh:     quick check of the likelihood path: action 1 with N_MH = 6 (one D
+          proposal, then updates at a cached D) and action 8
+  amis:   AMIS-only sequence with N_L=8 (> 5 free parameters, so the
+          weighted proposal covariance can be full rank)
   amis1d: same sequence with only beta_0 free (N_L=4); weights collapse onto
           one sample at these sample sizes, which makes any multi-parameter
           proposal covariance singular
   --continue: reuse an existing work tree and skip steps already in its log
-  amis: AMIS-only sequence with N_L=8 (> 5 free parameters, so the
-        weighted proposal covariance can be full rank)
+  --solver:   set diffusion_solver in the copied parameters_of_the_model.py
+              (peoc_py3 only; PEOC 1.0 ignores it); applied on the first pass
 """
 import os, re, shutil, subprocess, sys, time
 
@@ -63,7 +70,7 @@ parameters_ranges = np.array([[1000.0, 1000.0], [0.0, 0.0], [0.0, 800.0], [0.0, 
                               [1.0, 1.0], [0.0085, 0.0085], [0.05, 0.05]])
 ''')
 SOLVER = [a.split('=', 1)[1] for a in sys.argv if a.startswith('--solver=')]
-if SOLVER:  # peoc_py3 only; PEOC 1.0 ignores the variable
+if SOLVER and not CONT:  # peoc_py3 only; PEOC 1.0 ignores the variable
     with open(os.path.join(work, 'parameters_of_the_model.py'), 'a') as f:
         f.write("\ndiffusion_solver = '%s'  # e2e\n" % SOLVER[0])
 GRID = os.path.join(work, '8_parameters_for_computation_on_regular_grid.py')

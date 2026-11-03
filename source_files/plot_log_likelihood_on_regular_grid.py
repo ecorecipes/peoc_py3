@@ -5,7 +5,6 @@ import numpy as np
 import os
 import shutil
 import matplotlib.pyplot as pl
-from multiprocessing import Pool
 import matplotlib.pyplot as plt
 import scipy.optimize
 from matplotlib.colors import LogNorm

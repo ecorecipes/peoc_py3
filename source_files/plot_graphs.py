@@ -5,7 +5,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import matplotlib.lines
-from py2_compat import py2_str
+from py2_compat import py2_str, py2_round
             
 #plt.style.use('classic')
 ext = '.png'
@@ -167,7 +167,7 @@ def law_2D(path, x, y, index_x, index_y, weights_x=None):
     cbar = pl.colorbar()
     cbar.set_label('density', fontsize = font_size_z)
     cbar.ax.tick_params(labelsize=ticksize)
-    pl.title('Correlation coefficient: ' + py2_str(round(float(r), 2)),
+    pl.title('Correlation coefficient: ' + py2_str(py2_round(float(r), 2)),
                  fontsize=font_size_x)
     pl.xlabel(legen[index_x], fontsize=font_size_x)
     pl.ylabel(legen[index_y], fontsize=font_size_y)

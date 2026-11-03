@@ -6,6 +6,12 @@ import sys
 import numpy as np
 import os
 import shutil
+# PEOC only saves figures to files and never opens a window.  A GUI backend
+# (macOS's default 'macosx') is unsafe to fork after initialisation, and the
+# worker pools must fork, so always use the non-interactive Agg backend;
+# the saved PNG/PDF files are unchanged.
+import matplotlib
+matplotlib.use('Agg')
 
 plot_graphs_at_the_end_of_sampling_algo = False
 np.random.seed(1) #set the random seed (can be changed for independant runs).
@@ -134,7 +140,7 @@ if action in ["1", "2", "3", "8"] and save_script:
                     'observations.py',
                     'initialisation_rachis.py', 'plotting_functions.py',
                     'preliminary_computations_binomial_law.py', algo_file,
-                    'reaction_diffusion.py'],'source_files/',
+                    'reaction_diffusion.py', 'py2_compat.py'],'source_files/',
                     dossier+'/source_files')
 
 if action in ["1", "2", "3", "8"]:

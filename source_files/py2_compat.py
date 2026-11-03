@@ -14,13 +14,18 @@ were started with the Python 2 version, and vice versa).
   Gaussian is truncated to 12 significant digits. Resuming a run therefore
   restarts from this truncated state; we reproduce it exactly.
 """
+import decimal
 import math
 import numpy as np
 
 
 def py2_str(x):
-    """Return str(x) as Python 2.7 would print a Python float or int."""
-    if isinstance(x, float) and type(x) is float:
+    """Return str(x) as Python 2.7 would print a Python float or int.
+
+    Only exact Python floats are converted: numpy scalars such as np.float64
+    are deliberately left to their own str(), which already matched between
+    the Python 2 and Python 3 stacks."""
+    if type(x) is float:
         s = '%.12g' % x
         if not any(c in s for c in '.eEn'):  # 'n' covers 'nan' and 'inf'
             s += '.0'
@@ -28,12 +33,22 @@ def py2_str(x):
     return str(x)
 
 
-def py2_round(x):
-    """round(x) of Python 2: half away from zero, returned as a float."""
+_ROUND_CONTEXT = decimal.Context(prec=800, rounding=decimal.ROUND_HALF_UP)
+
+
+def py2_round(x, ndigits=0):
+    """round(x, ndigits) of Python 2.7, returned as a float.
+
+    Python 2 rounds the exact binary value of x to ndigits decimals, with
+    ties going away from zero; Python 3 sends ties to even.  floor(x + 0.5)
+    is not a substitute either, because x + 0.5 is itself rounded (it turns
+    0.49999999999999994 into 1.0).  Decimal(x) is exact, and the precision
+    is large enough for any double."""
     x = float(x)
-    if x >= 0.0:
-        return float(math.floor(x + 0.5))
-    return float(math.ceil(x - 0.5))
+    if math.isnan(x) or math.isinf(x) or x == 0.0:
+        return x
+    quantum = decimal.Decimal(1).scaleb(-ndigits)
+    return float(decimal.Decimal(x).quantize(quantum, context=_ROUND_CONTEXT))
 
 
 def save_random_state(folder):
