@@ -16,6 +16,7 @@ were started with the Python 2 version, and vice versa).
 """
 import decimal
 import math
+import os
 import numpy as np
 
 
@@ -51,15 +52,25 @@ def py2_round(x, ndigits=0):
     return float(decimal.Decimal(x).quantize(quantum, context=_ROUND_CONTEXT))
 
 
+def save_npy_atomic(path, arr):
+    """np.save(path, arr), but readers and a later resume never see a
+    half-written file: write a temporary file, then rename it over `path`.
+    The file contents are the same as np.save's."""
+    tmp = path + '.tmp'
+    with open(tmp, 'wb') as f:
+        np.save(f, arr)
+    os.replace(tmp, path)
+
+
 def save_random_state(folder):
     """Save the state of numpy's global RandomState as PEOC (Python 2) did:
     seed.npy  = byte-string array [name, pos, has_gauss, cached_gaussian]
     seed2.npy = the uint32 key array of the Mersenne Twister."""
     randomstate = np.random.get_state()
     seed = [randomstate[0], randomstate[2], randomstate[3], randomstate[4]]
-    np.save(folder + '/seed.npy',
-            np.array([py2_str(v).encode('ascii') for v in seed]))
-    np.save(folder + '/seed2.npy', randomstate[1])
+    save_npy_atomic(folder + '/seed.npy',
+                    np.array([py2_str(v).encode('ascii') for v in seed]))
+    save_npy_atomic(folder + '/seed2.npy', randomstate[1])
 
 
 def _as_text(v):

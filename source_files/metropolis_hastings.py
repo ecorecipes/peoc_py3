@@ -5,7 +5,8 @@ import simulationParameters_of_the_AMIS_or_MH_algorithm as paraMH
 import initialisation_rachis as init_rachis
 import plotting_functions
 import os
-from py2_compat import py2_str, py2_round, save_random_state, load_random_state
+from py2_compat import (py2_str, py2_round, save_random_state,
+                        load_random_state, save_npy_atomic)
 
 def print_parameters(text, parameters_set):
     print(text)
@@ -23,6 +24,7 @@ def print_parameters(text, parameters_set):
             
 def metropolis_hastings(dossier, oldSimu=None):
     N_mh = paraMH.N_MH
+    save_every = max(1, int(getattr(paraMH, 'save_every', 1)))
     #memory allocation
     Np = paraMH.number_of_parameters
     para_mh = np.zeros((N_mh+1, Np))
@@ -150,10 +152,16 @@ def metropolis_hastings(dossier, oldSimu=None):
         print("Acceptation rate of the algorithm:", py2_str(accept*1.0/(k+1)))
         print(py2_str((k+1)*100.0/N_mh), "% of the algorithm is done.")
         
-        np.save(dossier + '/sampled_parameters.npy', para_mh[:k+2])
-        np.save(dossier + '/log_likelihood.npy', log_vraisemblance[:k+2])
-        np.save(dossier + '/acceptation_rate.npy', acceptation_rate[:k+2])
-        save_random_state(dossier)
+        #port only: `save_every` (default 1, as in PEOC 1.0) thins the
+        #checkpoints; the arrays and the RNG state are always saved together
+        #and at the last iteration, so action 3 resumes from a checkpoint.
+        if (k+2) % save_every == 0 or k+1 >= N_mh:
+            save_npy_atomic(dossier + '/sampled_parameters.npy', para_mh[:k+2])
+            save_npy_atomic(dossier + '/log_likelihood.npy',
+                            log_vraisemblance[:k+2])
+            save_npy_atomic(dossier + '/acceptation_rate.npy',
+                            acceptation_rate[:k+2])
+            save_random_state(dossier)
         k +=1
 
     print("")

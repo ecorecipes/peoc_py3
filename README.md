@@ -13,6 +13,23 @@ This software is governed by the CeCILL license
 
 PEOC is Python software which aims to simulate and estimate the parameters of the chalara model of the article 'Mechanistic-statistical model for the expansion of ash dieback' by Coralie Fritsch, Marie Grosdidier, Anne Gégout-Petit and Benoît Marçais. It allows to reproduce the simulations made in this article, which is available at the following url [https://hal.science/hal-04690647](https://hal.science/hal-04690647).
 
+# Python 3 port
+
+This tree is a Python 3 port of PEOC 1.0 (numpy, scipy, matplotlib). With the same numerical libraries it gives the same outputs as the Python 2 original, bit for bit; `verification/` holds the comparison scripts. The original instructions below still apply, using `python3 main_script.py`. The port adds:
+
+- `diffusion_solver` in `parameters_of_the_model.py`: `'exact'` (default; identical outputs) or `'fast'` (sparse-LU Crank–Nicolson, 10–40× faster, log-likelihoods within ~1e-14 relative; valid for D ≤ 1280).
+- `save_every` (optional, in the algorithm file): MH saves its arrays and random state every `save_every` iterations instead of every iteration (default 1).
+- `run.py`: the menu actions from the command line, for scripted or parallel runs. It follows `main_script.py` step by step and gives the same output files. `python3 run.py -h` lists the options. Examples:
+
+      python3 run.py mh --solver fast --run-dir Simulations/my_chain \
+          --config-set N_MH=1000 --config-set "initial_parameters=[1000, 15, 24, 0, 18, 90, 40, 0.5, 0.0085, 0.05]"
+      python3 run.py resume my_chain --config-set N_MH=2000     # action 3
+      python3 run.py plots my_chain                             # action 4
+      python3 run.py compare-mh --config-set "simu=['my_chain', 'other_chain']"   # action 6
+
+  `--set NAME=EXPR` overrides a model parameter and `--config-set NAME=EXPR` a setting of the action's input file; both edit the copies saved in the run folder, never the top-level files.
+- `scripts/appendix_a1_chains.sh`: re-runs the ten MH chains of the paper's Appendix A.1 with this (released) model. The shipped `Simulations/MH_initial_condition_*` come from an earlier, unreleased model version and should not be resumed with this code.
+
 # Usage
 
 To run simulations :

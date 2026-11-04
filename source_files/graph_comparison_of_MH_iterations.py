@@ -13,6 +13,7 @@ in the folder 'Simulations/Compare_MH_(i+1)' if the folder
 import numpy as np
 import matplotlib.pyplot as pl
 import shutil
+import run_config
 import os
 import time
 import sys
@@ -25,7 +26,7 @@ while os.path.exists('Simulations/Compare_MH_' +str(i)):
     i += 1
 dossier = 'Simulations/Compare_MH_' +str(i) +'/'
 os.mkdir(dossier)
-shutil.copy("6_simulations_MH_to_compare.py", dossier +
+shutil.copy(run_config.source("6_simulations_MH_to_compare.py"), dossier +
                 '/simulations_MH_to_compare.py')
 sys.path.append(os.getcwd()+'/'+dossier)
 from simulations_MH_to_compare import *

@@ -13,6 +13,7 @@ in the folder 'Simulations/Compare_posterior_(i+1)' if the folder
 import numpy as np
 import matplotlib.pyplot as pl
 import shutil
+import run_config
 import os
 import time
 import sys
@@ -28,7 +29,7 @@ i = 1
 while os.path.exists('Simulations/Compare_posterior_' +str(i)): i += 1
 dossier = 'Simulations/Compare_posterior_' +str(i) +'/'
 os.mkdir(dossier)
-shutil.copy("7_simulations_AMIS_to_compare.py", dossier +
+shutil.copy(run_config.source("7_simulations_AMIS_to_compare.py"), dossier +
                 '/simulations_AMIS_to_compare.py')
 sys.path.append(os.getcwd()+'/'+dossier)
 from simulations_AMIS_to_compare import *

@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import os
 import shutil
+import run_config
 import matplotlib.pyplot as pl
 import matplotlib.pyplot as plt
 import scipy.optimize
@@ -17,7 +18,7 @@ while os.path.exists('Simulations/Likelihoods_on_regular_grids_' +str(i)):
     i += 1
 dossier = 'Simulations/Likelihoods_on_regular_grids_' +str(i) +'/'
 os.mkdir(dossier)
-shutil.copy("9_graph_log_likelihood_on_regular_grid.py", dossier +
+shutil.copy(run_config.source("9_graph_log_likelihood_on_regular_grid.py"), dossier +
                 '/graph_log_likelihood_on_regular_grid.py')
 sys.path.append(os.getcwd()+'/'+dossier)
 from graph_log_likelihood_on_regular_grid import *

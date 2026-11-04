@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+/.venv/
+/logs/
+# new runs; the shipped Simulations/MH_initial_condition_* stay tracked
+/Simulations/*
